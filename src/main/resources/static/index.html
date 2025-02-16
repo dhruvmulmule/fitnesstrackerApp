@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring Boot REST CRUD</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>CRUD Operations with Spring Boot REST API</h1>
+
+    <!-- Form to add or update an item -->
+    <h3>Add / Update Item</h3>
+    <form id="itemForm">
+        <label for="id">ID (Leave blank for new item): </label>
+        <input type="text" id="id" name="id"><br><br>
+        <label for="title">Title of Run: </label>
+        <input type="text" id="title" name="title"><br><br>
+        <label for="startedOn">Started On: </label>
+        <input type="text" id="startedOn" name="startedOn"><br><br>
+        <label for="completedOn">Completed On: </label>
+        <input type="text" id="completedOn" name="completedOn"><br><br>
+        <label for="miles">Miles: </label>
+        <input type="text" id="miles" name="miles"><br><br>
+        <label for="location">Location: </label>
+        <input type="text" id="location" name="location"><br><br>
+        <button type="button" onclick="createOrUpdateRun()">Save</button>
+    </form>
+
+    <br>
+
+    <!-- Get all items -->
+    <button onclick="getRuns()">Get All Runs</button>
+    <h3>Items List:</h3>
+    <ul id="itemList"></ul>
+
+    <br>
+
+    <!-- Delete item -->
+    <h3>Delete Item</h3>
+    <label for="deleteId">Enter ID to delete: </label>
+    <input type="text" id="deleteId"><br><br>
+    <button onclick="deleteRun()">Delete</button>
+
+    <script>
+        const apiUrl = 'http://localhost:8080/api/runs';  // Change to your Spring Boot API URL
+
+        // Create or Update Item
+        function createOrUpdateRun() {
+            const id = $('#id').val();
+            const titled = $('#title').val();
+            const StartedOn = $('#startedOn').val();
+            const CompletedOn = $('#completedOn').val();
+            const Miles = $('#miles').val();
+            const Location = $('#location').val();
+
+            const runData = { 
+                title,startedOn,completedOn,miles,location
+            };
+            
+            if (id) {
+                // PUT request to update an item
+                $.ajax({
+                    url: `${apiUrl}/${id}`,
+                    method: 'PUT',
+                    contentType: 'application/json',
+                    data: JSON.stringify(runData),
+                    success: function(response) {
+                        getRuns();
+                        alert('Item updated successfully!');
+                    },
+                    error: function(err) {
+                        alert('Error updating item');
+                    }
+                });
+            } else {
+                // POST request to create a new item
+                $.ajax({
+                    url: apiUrl,
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(runData),
+                    success: function(response) {
+                        alert('Item created successfully!');
+                        getRuns();
+                    },
+                    error: function(err) {
+                        alert('Error creating item');
+                    }
+                });
+            }
+            
+            $('#id').val('');
+            $('#titled').val('');
+            $('#StartedOn').val('');
+            $('#CompletedOn').val('');
+            $('#Miles').val('');
+            $('#Location').val('');
+           
+        }
+
+        // Get all items (GET)
+        function getRuns() {
+            $.ajax({
+                url: apiUrl,
+                method: 'GET',
+                success: function(runs) {
+                    const itemList = $('#itemList');
+                    itemList.empty();
+                    runs.forEach(run => {
+                        itemList.append(`<li>ID: ${run.id}, Title: ${run.title}, StartedOn: ${run.startedOn}, CompletedOn: ${run.completedOn}, Miles: ${run.miles}, Location: ${run.location}</li>`);
+                    });//titled,StartedOn,CompletedOn,Miles,Location
+                },
+                error: function(err) {
+                    alert('Error fetching items');
+                }
+            });
+        }
+
+        // Delete item (DELETE)
+        function deleteRun() {
+            const id = $('#deleteId').val();
+
+            if (!id) {
+                alert('Please enter an ID to delete');
+                return;
+            }
+
+            $.ajax({
+                url: `${apiUrl}/${id}`,
+                method: 'DELETE',
+                success: function(response) {
+                    alert('Item deleted successfully!');
+                    getRuns();
+                },
+                error: function(err) {
+                    alert('Error deleting item');
+                }
+            });
+
+            $('#deleteId').val('');
+        }
+    </script>
+</body>
+</html>
